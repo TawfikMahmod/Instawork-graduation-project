@@ -7,14 +7,8 @@ export interface SuccessRespons {
 
 export type LogedUser = {
         userId: string
-        fullname: string
-        phoneNumber: string
         role: string
-        email: string
-        bio:string
-        profileImageUrl: string
     }
-
 
 
 export interface ErorrRespons {

@@ -1,448 +1,695 @@
 "use client";
+import { UserData, UserDataRespons } from "@/app/types/UserInterface";
+import UpdateingUserInfo from "@/services/UpdateUserInfo";
+import CallingUserInfoAPI from "@/services/UserInfoAPI";
+import { AiOutlineLoading } from "react-icons/ai";
+import { CalendarDate } from "@internationalized/date";
 import {
+  addToast,
   Autocomplete,
   AutocompleteItem,
   Button,
+  DateInput,
   Input,
   Textarea,
+  ToastProvider,
 } from "@heroui/react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { FaRegEdit } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
 import { MdEdit, MdOutlineAddPhotoAlternate } from "react-icons/md";
 import { MdCancel } from "react-icons/md";
-
-{
-  titel: "sdasd";
-  des: "asdasd";
-  tags: [
-    "keyword-1",
-    "keyword-2",
-    "keyword-3",
-    "keyword-4",
-    "keyword-5",
-    "keyword-6",
-    "keyword-7",
-    "keyword-8",
-  ];
-}
+import { Governorates } from "@/components/DashBord Commponents/Profile/Governorates";
+import Loader from "@/components/Loader";
 
 export default function page() {
-  // /////////////// Name Name Name Name Name ////////////////////
-  const [CountroledNameInput, setCountroledNameInput] = useState<string>("");
-  const [EditInputName, setEditInputName] = useState<boolean>(false);
-  let NameErorrHandeling = null;
-  // ///////////////////////////////////////////////////////
-  //
-  //
-  // //////////////////// bio bio bio bio bio //////////////////////////
-  const [CountroledInputBIO, setCountroledInputBIO] = useState<string>("");
-  const [EditInputBIO, setEditInputBIO] = useState<boolean>(false);
-  // ///////////////////////////////////////////////////////
   //
   //
   //
-  ////////////// Phone 1  Phone 1  Phone 1  Phone 1
-  const [EditInputPhone1, setEditInputPhone1] = useState<boolean>(true);
-  const [EditInputPhone1Value, setEditInputPhone1Value] =
-    useState<string>("null");
-  const [erorrEditInputPhone1, seterorrEditInputPhone1] = useState<
+  const { data } = useSession();
+  //
+
+  //
+  //
+  const [LoadingPage, setLoadingPage] = useState<boolean>(true);
+  //
+  /////////////--------- Edit mode trigger ---------////////////
+  const [EditeMode, setEditeMode] = useState<boolean>(false);
+  ///
+  //  ///////////////// saveing btn loading /////////////////
+
+  const [LoadingSaveBtn, setLoadingSaveBtn] = useState<boolean>(false);
+  //////////////////////////////////////////
+  //
+  ///////////////// IMGE FILE /////////////////////////
+  const [ImgeInputURL, setImgeInputURL] = useState<any>(null);
+  const [ImgeInputFILES, setImgeInputFILES] = useState<any>();
+  //////////////////////////////////////////
+  //
+  /////////////--------- UserInfo -- state ---------////////////
+  const [UserIFON, setUserIFON] = useState<UserData>();
+  //--------------
+  //------------------
+  //----------------------
+  //--------------------------
+  /////////////--------- Input---Bio -- state ---------///////////////////////////////////////////
+  const [CountroledInputBIO, setCountroledInputBIO] = useState<string | null>(
+    null
+  );
+  // error state
+  const [ErorrBio, setErorrBio] = useState<string | null>(null);
+  //
+  /////////////--------- Input---Name -- state ---------////////////////////////////////////////
+  const [CountroledNameInput, setCountroledNameInput] = useState<string | null>(
+    null
+  );
+  // error state
+  const [ErorrName, setErorrName] = useState<string | null>(null);
+  //
+  /////////////--------- Input---PhoneNumber(1) --state  ---------////////////////////////////////
+  const [CountroledPhone_1_Input, setCountroledPhone_1_Input] = useState<
+    string | null
+  >();
+  const [ErorrPhone_1, setErorrPhone_1] = useState<string | null>(null);
+  //
+  /////////////--------- Input---PhoneNumber(2) --state  ---------////////////////////////////////
+  const [CountroledPhone_2_Input, setCountroledPhone_2_Input] = useState<
+    string | null
+  >();
+  const [ErorrPhone_2, setErorrPhone_2] = useState<string | null>(null);
+  //
+  /////////////--------- Input---Email--state  ---------/////////////////////////////////////////
+  const [CountroledEmailInput, setCountroledEmailInput] = useState<
     string | null
   >(null);
-  // ///////////////////////////////////////////////////////
+  const [ErorrEmail, setErorrEmail] = useState<string | null>(null);
+  //
+  ///-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/---------- [Selection inputs] ---------/-/-/-/-/-/-/-/--/--/-/-/-/-/-/-/-//-/-/--/
+  //
+  //
+  /////////////////////////--------- Input---Address--state  ---------////////////////////////////////
+  const [CountroledAddress_Selection, setCountroledAddress_Selection] =
+    useState<string | null>(null);
+  const [UnlockInput, setUnlockInput] = useState<boolean>(false);
+  const [ErorrAddress, setErorrAddress] = useState<string | null>(null);
+  //
+  //
+  /////////////////////////--------- Input---Gender--state  ---------////////////////////////////////
+  const [CountroledGender_Selection, setCountroledGender_Selection] = useState<
+    string | null
+  >(null);
+  const [UnlockGenderInput, setUnlockGenderInput] = useState<boolean>(false);
 
+  const [ErorrGender, setErorrGender] = useState<string | null>(null);
+  //
+  //
+  /////////////////////////--------- Input---DateOfBirth--state  ---------////////////////////////////////
+  const [CountroledDateOfBirth_Selection, setCountroledDateOfBirth_Selection] =
+    useState<any>(null);
+  const [ErorrDateOfBirth, setErorrDateOfBirth] = useState<any>();
   //
   //
   //
-  ////////////////  Phone 2 Phone 2 Phone 2 Phone 2 Phone 2 ///////////////////////////////
-  const [EditInputPhone2Value, setEditInputPhone2Value] =
-    useState<string>("null");
-  const [EditInputPhone2, setEditInputPhone2] = useState<boolean>(false);
-  // ///////////////////////////////////////////////////////
+  // const [ImgeInputFiles, setImgeInputFiles] = useState<any>();
 
-  //
-  //
-  //
-  // ///////////////////// Email Email Email Email Email //////////////////////////////////
-  const [EmailInputValue, setEmailInputValue] = useState<string>("null");
-  const [EmailInputToggel, setEmailInputToggel] = useState<boolean>(false);
-  // ///////////////////////////////////////////////////////
-
-  //
-  //
-  //
-  // //////////////////// Address Address Address Address ////////////////////////////////////////
-  const [EditAddressInput, setEditAddressInput] = useState<boolean>(false);
-  const [AddressInputValue, setAddressInputValue] = useState<any>("");
-  const ServiceAddress = [
-    { Address: "الجيزه" },
-    { Address: "البحيره" },
-    { Address: "الدقهلية" },
-    { Address: "الاسماعليه" },
-    { Address: "مرسي مطروح" },
-    { Address: "سكندريه" },
-    { Address: "شمال سيناء" },
-    { Address: "الخرطوم" },
-  ];
-  // ///////////////////////////////////////////////////////
-
-  //
-  //
-  //
-  // //////////////////////////Gender Gender Gender Gender Gender//////////////////////////////////////
-  const [EditGenderInput, setEditGenderInput] = useState<boolean>(false);
-  const [GenderInputValue, setGenderInputValue] = useState<string>("");
-  // ///////////////////////////////////////////////////////
-
-  //
-  //
-  //
-  //
-  // /////////////////////// DateOFberth DateOFberth DateOFberth DateOFberth //////////////////////////////////////
-  const [EditDateOFberthInput, setEditDateOFberthInput] =
-    useState<boolean>(false);
-  const [DateOFberthValue, setDateOFberthValue] = useState<string>("");
-  // ///////////////////////////////////////////////////////
-
-  //
-  //
-  //
-  //
-  //
-
-  const { data } = useSession();
-  useEffect(() => {
-    if (data?.user) {
-      setCountroledNameInput(data.user.fullname);
-      //
-      setCountroledInputBIO(data.user.bio);
-      //
-      setEditInputPhone1Value(data?.user.phoneNumber);
-      //
-      setEmailInputValue(data.user.email);
-      //
-      setGenderInputValue("Male");
-    }
-  }, [data?.user]);
-  // /////////////////////////////////////////////////////////////////
-  // /////////////////////////////////////////////////////////////////
-
-  // /////////////////////////////////////////////////////////////////
-  interface UpDatedInfo {
-    Fullname?: string;
-    Bio?: string;
-    PhoneNumber?: string;
-    SecondPhoneNumber?: string;
-    Email?: string;
-    Address?: string;
-    Gender?: string;
-    DateOfBirth?: string;
+  function ExtraxtingImgeFile(e: any) {
+    setImgeInputURL(URL.createObjectURL(e.target.files[0]));
+    setImgeInputFILES(e.target.files[0]);
+    // get the img file and display it
+    console.log(ImgeInputURL);
   }
+
+  //
+  //console.log(ImgeInputFiles);
+  //
+  //
 
   const phoneRegix = /^(\+201|01|00201)[0-2,5]{1}[0-9]{8}$/;
   const EmailRegix = /^[\w\.-]+@[\w\.-]+\.\w{2,}$/;
 
-  async function EditUserInfo() {
-    const Updated_data: UpDatedInfo = {
-      Fullname: CountroledNameInput,
-      Bio: CountroledInputBIO,
-      SecondPhoneNumber: EditInputPhone2Value.replace("+", ""),
-      Email: EmailInputValue,
-      Address: AddressInputValue,
-      Gender: GenderInputValue,
-      DateOfBirth: DateOFberthValue,
-    };
-    console.log(Updated_data);
-    // regix for the rest of the inputs and handel erorrs also and in the last send the updated data to api
-    if (phoneRegix.test(EditInputPhone1Value.replace("+", ""))) {
-      const PhoneNumber1 = EditInputPhone1Value;
-      Updated_data.PhoneNumber = PhoneNumber1;
-      seterorrEditInputPhone1(null);
+  async function CollectNewData() {
+    setLoadingSaveBtn(true);
+    const formdata = new FormData();
+    //
+
+    formdata.append("Bio", CountroledInputBIO + "");
+    //
+    //
+    //
+    ////////////////-----name ////////////////////////
+    if (CountroledNameInput === "") {
+      setErorrName("Cant let Name Empty");
+    } else if (CountroledNameInput!?.length > 20) {
+      setErorrName("name cant be more then 20 char");
+    } else if (CountroledNameInput!?.length < 3) {
+      setErorrName("name cant be less then 3 char");
     } else {
-      seterorrEditInputPhone1("Phone Number inValid");
+      formdata.append("Fullname", CountroledNameInput + "");
+      setErorrName(null);
     }
+    ///////////////////////////////////////////////
+    //
+    //
+    //////////////-----------phone (1) ////////////////
+    if ("+" + CountroledPhone_1_Input === UserIFON?.phoneNumber) {
+    } else if (CountroledPhone_1_Input === "") {
+      setErorrPhone_1("Cant let Phone Number Empty!");
+    } else if (phoneRegix.test(CountroledPhone_1_Input!)) {
+      formdata.append("PhoneNumber", "+" + CountroledPhone_1_Input);
+      setErorrPhone_1(null);
+    } else {
+      setErorrPhone_1("Phone Number inValid");
+    }
+    ///////////////////////////////////////////////
+    //
+    //
+    //////////////-----------phone (2) ////////////////
+    if ("+" + CountroledPhone_2_Input === UserIFON?.secondPhoneNumber) {
+      setErorrPhone_2(null);
+    } else if (phoneRegix.test(CountroledPhone_2_Input!)) {
+      formdata.append("SecondPhoneNumber", "+" + CountroledPhone_2_Input);
+      setErorrPhone_2(null);
+    } else if (CountroledPhone_2_Input === "") {
+      setErorrPhone_2(null);
+    } else if (
+      CountroledPhone_2_Input !== null &&
+      CountroledPhone_2_Input! !== ""
+    ) {
+      setErorrPhone_2("Second Phone Number inValid");
+    }
+    ///////////////////////////////////////////////
+    //
+    //
+    ////////////--------------- Email
+    if (CountroledEmailInput === "") {
+      setErorrEmail("Cant let the fuckin Email Empty Man!!");
+    } else if (EmailRegix.test(CountroledEmailInput!)) {
+      formdata.append("Email", CountroledEmailInput + "");
+      setErorrEmail(null);
+    } else {
+      setErorrEmail("Email inValid");
+    }
+    // //////////////////////////////////////////////
+    //
+    //
+    //
+    //
+    //
+    formdata.append("Address", CountroledAddress_Selection + "");
+    //
+    //
+    //
+    formdata.append("Gender", CountroledGender_Selection + "");
+    //
+    //
+    //
+    formdata.append("DateOfBirth", CountroledDateOfBirth_Selection + "");
+    //
+    //
+    //
+    ///////////// img img img img img img img
+    if (ImgeInputFILES) {
+      formdata.append("ProfileImage", ImgeInputFILES);
+    }
+    //
+    //
+
+    console.log(formdata.get("Bio"));
+    console.log(formdata.get("Fullname"));
+    console.log(formdata.get("PhoneNumber"));
+    console.log(formdata.get("SecondPhoneNumber"));
+    console.log(formdata.get("Email"));
+    console.log(formdata.get("Address"));
+    console.log(formdata.get("Gender"));
+    console.log(formdata.get("DateOfBirth"));
+    console.log(formdata.get("ProfileImage"));
+
+    //
+    //
+    //
+    //
+    //
+    //
+    await CallingAPI(formdata);
+    //
+    //
+    await setLoadingSaveBtn(false);
   }
 
-  // /////////////////////////////////////////////////////////////////
+  async function CallingAPI(data: any) {
+    const res = await UpdateingUserInfo(data);
+    console.log(res);
+    setLoadingSaveBtn(false);
+    if (res.message) {
+      UserInfo();
+      addToast({
+        title: res.message,
+        color: "success",
+      });
+      console.log(res);
+      setEditeMode(false);
+      console.log("okokok");
+    } else {
+      addToast({
+        title: "Error",
+        color: "danger",
+      });
+    }
+  }
+  //
+  //
+  //
+  //CountroledInputBIO
+  //ErorrBio
+  //
 
-  // /////////////////////////////////////////////////////////////////
-  // /////////////////////////////////////////////////////////////////
+  //CountroledNameInput
+  //ErorrName
+  //
+
+  //CountroledPhone_1_Input
+  //ErorrPhone_1
+  //
+
+  //CountroledPhone_2_Input
+  //ErorrPhone_2
+  //
+
+  //CountroledEmailInput
+  //ErorrEmail
+  //
+  //CountroledAddress_Selection
+  //ErorrAddress
+  //
+  //CountroledGender_Selection
+  //ErorrGender
+  //
+  //CountroledDateOfBirth_Selection
+  //ErorrDateOfBirth
+  //
+
+  async function UserInfo() {
+    if (data?.user.userId) {
+      const respons: UserDataRespons = await CallingUserInfoAPI(
+        data?.user.userId
+      );
+      if (respons) {
+        setLoadingPage(false);
+        setUserIFON(respons.data);
+        BindingData(respons.data);
+      }
+    }
+  }
+  //
+
+  function BindingData(Data: UserData) {
+    console.log(Data);
+
+    setCountroledInputBIO(Data.bio!);
+    //
+    //name
+    setCountroledNameInput(Data.fullname);
+    //
+    //phone (1)
+    // guard replace in case values are null/undefined
+    try {
+      setCountroledPhone_1_Input(
+        Data.phoneNumber ? Data.phoneNumber.replace("+", "") : null
+      );
+    } catch (e) {
+      setCountroledPhone_1_Input(Data.phoneNumber ?? null);
+    }
+    //
+    //phone (2)
+    try {
+      setCountroledPhone_2_Input(
+        Data.secondPhoneNumber ? Data.secondPhoneNumber.replace("+", "") : null
+      );
+    } catch (e) {
+      setCountroledPhone_2_Input(Data.secondPhoneNumber ?? null);
+    }
+    //
+    //emile
+    setCountroledEmailInput(Data.email);
+
+    //Address
+    setCountroledAddress_Selection(Data.address);
+    //
+    //Gender
+    setCountroledGender_Selection(Data.gender);
+    //
+    //DateOfBirth
+    setCountroledDateOfBirth_Selection(Data.dateOfBirth);
+    //
+    // img
+    setImgeInputURL(Data.profileImage);
+  }
+  //
+  //
+  // did amount
+  const [test, settest] = useState<boolean>(false);
+  // amount update
+  useEffect(() => {
+    //
+    //
+    if (
+      (CountroledInputBIO != UserIFON?.bio && CountroledInputBIO != null) ||
+      (CountroledNameInput != UserIFON?.fullname &&
+        CountroledNameInput != null) ||
+      //
+      ("+" + CountroledPhone_1_Input != UserIFON?.phoneNumber &&
+        CountroledPhone_1_Input != null) ||
+      ("+" + CountroledPhone_2_Input != UserIFON?.secondPhoneNumber &&
+        CountroledPhone_2_Input != null) ||
+      (CountroledEmailInput != UserIFON?.email &&
+        CountroledEmailInput != null) ||
+      //
+      (CountroledAddress_Selection != UserIFON?.address &&
+        CountroledAddress_Selection != null) ||
+      //
+      (CountroledGender_Selection != UserIFON?.gender &&
+        CountroledGender_Selection != null) ||
+      //
+      (CountroledDateOfBirth_Selection != UserIFON?.dateOfBirth &&
+        CountroledDateOfBirth_Selection != null) ||
+      (ImgeInputURL != UserIFON?.profileImage && ImgeInputURL != null)
+      //
+    ) {
+      setEditeMode(true);
+    }
+    //
+    //
+    //
+  }, [
+    CountroledInputBIO,
+    CountroledNameInput,
+    CountroledPhone_1_Input,
+    CountroledPhone_2_Input,
+    CountroledEmailInput,
+    CountroledAddress_Selection,
+    CountroledGender_Selection,
+    CountroledDateOfBirth_Selection,
+    ImgeInputURL,
+  ]);
+
+  useEffect(() => {
+    UserInfo();
+  }, [test]);
+
+  useEffect(() => {
+    //
+    settest(!test);
+    //
+  }, []);
 
   return (
-    <section className="bg-primry-background min-h-screen w-full selection:bg-main-background selection:text-primry-background ">
-      <form className="grid grid-cols-1 md:grid-cols-3">
-        {/* ///////////////// right side //////////////////// */}
-        <div className=" h-screen w-full md:border-r-2 border-main-background p-2">
-          <div className="-500 text-center my-15 ">
-            {/* //////////////////////////////////////////////////////////////////////////////////////// */}
-            <figure className="rounded-md overflow-hidden  mx-auto w-60 h-60 group  relative">
-              <i className="absolute bottom-0 left-0 right-0 opacity-80  h-9 transition-all cursor-pointer group-hover:translate-y-0 translate-y-9 text-2xl text-primry-background text-center bg-main-background">
-                <MdOutlineAddPhotoAlternate className="inline-block mx-2" />{" "}
-              </i>
-              <img
-                src="https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
-                className=" bg-contain bg-center w-full  inline-block"
-                alt=""
-              />
-            </figure>
-            {/* //////////////////////////////////////////////////////////////////////////////////////// */}
-            <figcaption className=" ps-5 p-3 text-left flex flex-col gap-3">
-              {/* name */}
-              <div className="   py-3 border-b-1 border-main-background">
-                <div className="flex gap-3 justify-center">
-                  <span className="font-bold text-xl">Name:</span>
-                  <Input
-                    required
-                    // isInvalid={Boolean(errors.Fullname?.message)}
-                    // errorMessage={errors.Fullname?.message}
-                    isDisabled={!EditInputName}
-                    value={CountroledNameInput!}
-                    onChange={(e) => setCountroledNameInput(e.target.value)}
-                    className="inline-block"
-                  >
-                    {" "}
-                  </Input>{" "}
-                  {EditInputName ? (
-                    <MdCancel
-                      className="inline-block text-3xl cursor-pointer"
-                      onClick={() => {
-                        setEditInputName(false);
-                        setCountroledNameInput(data?.user.fullname!);
-                      }}
+    <>
+      {LoadingPage ? (
+        <div className="h-screen content-center text-center">
+          <div className="-translate-y-full">
+            <Loader />
+            <span className="ps-6  my-3">Loading . . .</span>
+          </div>
+        </div>
+      ) : (
+        <section
+          className={` bg-linear-to-b from-primry-background via-gray-50 to-white min-h-screen w-full selection:bg-main-background selection:text-primry-background`}
+        >
+          {/* -Profile header- */}
+          <header className="relative w-full pt-8 pb-12 bg-linear-to-r from-main-background to-orange-700 shadow-xl rounded-b-2xl overflow-hidden">
+            <div className="container mx-auto px-4">
+              <div className="grid max-md:justify-center md:grid-cols-5 gap-6 items-center">
+                {/* Profile Image */}
+                <div className="max-lg:col-span-2 mx-auto">
+                  <div className="relative w-40 h-40 rounded-full overflow-hidden group shadow-2xl ring-2 ring-white border-4 border-primry-background hover:shadow-3xl transition-all duration-300">
+                    <img
+                      src={
+                        ImgeInputURL
+                          ? ImgeInputURL
+                          : "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
+                      }
+                      className="h-full w-full object-cover"
+                      alt="Profile"
                     />
-                  ) : (
-                    <FaEdit
-                      onClick={() => setEditInputName(true)}
-                      className="inline-block text-3xl cursor-pointer"
-                    />
+                    <span className="absolute cursor-pointer bottom-0 left-0 right-0 h-full bg-main-background/90 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center">
+                      <MdOutlineAddPhotoAlternate className="text-4xl text-primry-background mb-2" />
+                      <p className="text-primry-background text-sm font-semibold">
+                        تغيير الصورة
+                      </p>
+                      <label
+                        htmlFor="ImgInput"
+                        className="absolute inset-0 cursor-pointer"
+                      >
+                        <input
+                          onChange={(e) => ExtraxtingImgeFile(e)}
+                          id="ImgInput"
+                          className="hidden"
+                          type="file"
+                        />
+                      </label>
+                    </span>
+                  </div>
+                </div>
+
+                {/* User Info */}
+                <div className="col-span-3 max-md:text-center text-primry-background">
+                  <h2 className="text-4xl font-bold mb-2">
+                    {UserIFON?.fullname}
+                  </h2>
+                  <p className="text-lg font-semibold opacity-90">
+                    {UserIFON?.email}
+                  </p>
+                  <p className="text-sm mt-3 opacity-75 max-w-md">
+                    {UserIFON?.bio || "أضف نبذة عن نفسك"}
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div
+                  className={`${
+                    EditeMode &&
+                    " fixed top-0 left-0 right-0 bg-main-background shadow-xl z-40 py-4"
+                  } col-span-1 flex justify-center gap-4 p-2`}
+                >
+                  {EditeMode && (
+                    <div className="flex gap-3">
+                      {/* Save Button */}
+                      <Button
+                        onPress={() => CollectNewData()}
+                        isLoading={LoadingSaveBtn}
+                        className="bg-linear-to-r from-main-background to-orange-600 text-white font-bold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                      >
+                        <span className="text-lg">✓</span> حفظ
+                      </Button>
+                      {/* Cancel Button */}
+                      <Button
+                        onPress={() => {
+                          setEditeMode(!EditeMode),
+                            setUnlockGenderInput(false),
+                            setUnlockInput(false);
+                          BindingData(UserIFON!);
+                          setLoadingSaveBtn(false);
+                        }}
+                        className="bg-linear-to-r from-red-500 to-red-600 text-white font-bold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                      >
+                        <span className="text-lg">✕</span> إلغاء
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
-              {/* //////////////////////////////////////////////////////////////////////////////////////// */}
-              {/* bio */}
-              <div className="  py-3 border-b-1 border-main-background">
-                <h3 className="grid grid-cols-1 gap-3 justify-center">
-                  <span className="block">Bio :</span>
-                  <Textarea
-                    // isInvalid={Boolean(errors.Bio?.message)}
-                    // errorMessage={errors.Bio?.message}
-                    isDisabled={!EditInputBIO}
-                    onChange={(e) => setCountroledInputBIO(e.target.value)}
-                    value={CountroledInputBIO!}
-                    className="block"
-                  >
-                    {" "}
-                  </Textarea>{" "}
-                  {EditInputBIO ? (
-                    <MdCancel
-                      className="inline-block text-3xl cursor-pointer"
-                      onClick={() => {
-                        setEditInputBIO(false);
-                        setCountroledInputBIO(data?.user.bio!);
-                      }}
-                    />
+            </div>
+          </header>
+          {/* ------------ bio --------------------- */}
+          <div className="p-5  ">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border-l-8 border-main-background">
+              <label className="block text-main-background font-bold text-lg mb-3">
+                نبذة عن نفسك
+              </label>
+              <Textarea
+                isInvalid={Boolean(ErorrBio)}
+                errorMessage={ErorrBio}
+                onChange={(e) => setCountroledInputBIO(e.target.value)}
+                value={
+                  CountroledInputBIO! === "null" ? "" : CountroledInputBIO!
+                }
+                maxLength={200}
+                placeholder="اكتب نبذة عن نفسك وخبرتك"
+                variant="faded"
+                type="text"
+                className="rounded-lg"
+              />
+              {CountroledInputBIO && (
+                <span className="text-gray-500 text-sm mt-2 block">
+                  المتبقي: {200 - CountroledInputBIO.length} أحرف
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* -Profile Body- */}
+          <div className="w-full bg-linear-to-b from-white to-gray-50 py-12">
+            <div className="container mx-auto px-4">
+              <div className="grid max-sm:grid-cols-1 grid-cols-2  gap-8">
+                {/* Column 1 - Name, Phone Numbers - Email */}
+                {/* Name Input */}
+                <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-blue-500 mb-6 hover:shadow-xl transition-all duration-300">
+                  <label className="block text-main-background font-bold text-lg mb-2">
+                    الاسم الكامل
+                  </label>
+                  <Input
+                    isInvalid={Boolean(ErorrName)}
+                    errorMessage={ErorrName}
+                    onChange={(e) => setCountroledNameInput(e.target.value)}
+                    value={CountroledNameInput!}
+                    variant="faded"
+                    type="text"
+                    placeholder="أدخل اسمك الكامل"
+                  />
+                </div>
+
+                {/* Phone 1 Input */}
+                <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-main-background mb-6 hover:shadow-xl transition-all duration-300">
+                  <label className="block text-main-background font-bold text-lg mb-2">
+                    رقم الهاتف الأول
+                  </label>
+                  <Input
+                    isInvalid={Boolean(ErorrPhone_1)}
+                    errorMessage={ErorrPhone_1}
+                    onChange={(e) => setCountroledPhone_1_Input(e.target.value)}
+                    value={CountroledPhone_1_Input!}
+                    variant="faded"
+                    type="text"
+                    placeholder="01xxxxxxxxx"
+                  />
+                </div>
+
+                {/* Phone 2 Input */}
+                <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-purple-500 mb-6 hover:shadow-xl transition-all duration-300">
+                  <label className="block text-main-background font-bold text-lg mb-2">
+                    رقم الهاتف الثاني
+                  </label>
+                  <Input
+                    isInvalid={Boolean(ErorrPhone_2)}
+                    errorMessage={ErorrPhone_2}
+                    onChange={(e) => setCountroledPhone_2_Input(e.target.value)}
+                    value={CountroledPhone_2_Input!}
+                    type="text"
+                    variant="faded"
+                    placeholder="01xxxxxxxxx"
+                  />
+                </div>
+                {/* Email Input */}
+                <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-red-500 mb-6 hover:shadow-xl transition-all duration-300">
+                  <label className="block text-main-background font-bold text-lg mb-2">
+                    البريد الإلكتروني
+                  </label>
+                  <Input
+                    isInvalid={Boolean(ErorrEmail)}
+                    errorMessage={ErorrEmail}
+                    onChange={(e) => setCountroledEmailInput(e.target.value)}
+                    value={CountroledEmailInput!}
+                    variant="faded"
+                    type="email"
+                    placeholder="example@email.com"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Column 2 - Email, Address, Gender, Date */}
+            <div className="  ">
+              {/* Address & Gender */}
+              <div className="grid max-sm:grid-cols-1 grid-cols-3 gap-6 mb-6 p-4">
+                {/* Address */}
+                <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-orange-500 hover:shadow-xl transition-all duration-300">
+                  <label className="block text-main-background font-bold text-lg mb-2">
+                    المحافظة
+                  </label>
+                  {UnlockInput ? (
+                    <Autocomplete
+                      isInvalid={Boolean(ErorrAddress)}
+                      errorMessage={ErorrAddress}
+                      onInputChange={(S) => setCountroledAddress_Selection(S)}
+                      className="w-full"
+                      defaultItems={Governorates}
+                      placeholder="اختر المحافظة"
+                    >
+                      {(Governorate) => (
+                        <AutocompleteItem key={Governorate.label}>
+                          {Governorate.label}
+                        </AutocompleteItem>
+                      )}
+                    </Autocomplete>
                   ) : (
-                    <FaEdit
-                      onClick={() => setEditInputBIO(true)}
-                      className="inline-block text-3xl cursor-pointer"
-                    />
+                    <Button
+                      onPress={() => setUnlockInput(!UnlockInput)}
+                      className="w-full bg-linear-to-r from-orange-500 to-orange-600 text-white font-semibold p-3 rounded-lg hover:shadow-lg transition-all duration-300"
+                    >
+                      {CountroledAddress_Selection === "null" ? (
+                        <span className="text-purple-700">"add address !"</span>
+                      ) : (
+                        CountroledAddress_Selection
+                      )}
+                    </Button>
                   )}
-                </h3>
+                </div>
+
+                {/* Gender */}
+                <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-pink-500 hover:shadow-xl transition-all duration-300">
+                  <label className="block text-main-background font-bold text-lg mb-2">
+                    النوع
+                  </label>
+                  {UnlockGenderInput ? (
+                    <Autocomplete
+                      isRequired
+                      isInvalid={Boolean(ErorrGender)}
+                      errorMessage={ErorrGender}
+                      onInputChange={(S) => setCountroledGender_Selection(S)}
+                      value={CountroledGender_Selection!}
+                      className="w-full"
+                      placeholder="اختر النوع"
+                    >
+                      <AutocompleteItem>Male</AutocompleteItem>
+                      <AutocompleteItem>Female</AutocompleteItem>
+                    </Autocomplete>
+                  ) : (
+                    <Button
+                      onPress={() => setUnlockGenderInput(!UnlockGenderInput)}
+                      className="w-full bg-linear-to-r from-pink-500 to-pink-600 text-white font-semibold p-3 rounded-lg hover:shadow-lg transition-all duration-300"
+                    >
+                      {CountroledGender_Selection}
+                    </Button>
+                  )}
+                </div>
+
+                {/* Date of Birth */}
+                <div className="p-6 w-full mx-auto bg-white rounded-2xl shadow-lg border-l-8 border-cyan-500 hover:shadow-xl transition-all duration-300">
+                  <label className="block text-main-background font-bold text-lg mb-2">
+                    تاريخ الميلاد
+                  </label>
+                  <div className="flex w-full gap-4">
+                    <Input
+                      isInvalid={Boolean(ErorrDateOfBirth)}
+                      errorMessage={ErorrDateOfBirth}
+                      onChange={(e) =>
+                        setCountroledDateOfBirth_Selection(e.target.value)
+                      }
+                      value={
+                        CountroledDateOfBirth_Selection &&
+                        CountroledDateOfBirth_Selection.split("T")[0]
+                      }
+                      className="w-full"
+                      type="date"
+                    />
+                  </div>
+                </div>
               </div>
-              {/* //////////////////////////////////////////////////////////////////////////////////////// */}
-
-              {/* //////////////////////////////////////////////////////////////////////////////////////// */}
-            </figcaption>
-            {/* //////////////////////////////////////////////////////////////////////////////////////// */}
-          </div>
-        </div>
-
-        {/* ///////////////// right side //////////////////// */}
-        {/* /// */}
-        {/* /// */}
-        {/* ////////////////// left side //////////////////// */}
-        <div className=" md:col-span-2 min-h-screen w-full text-right">
-          <div className=" px-5 my-15">
-            {/* /////////////////////// */}
-            <div className="border-b-1 flex justify-end align-middle  gap-4 text-center  border-main-background px-2 py-7">
-              {EditInputPhone1 ? (
-                <FaEdit
-                  onClick={() => setEditInputPhone1(false)}
-                  className="text-2xl inline-block cursor-pointer my-2"
-                />
-              ) : (
-                <MdCancel
-                  onClick={() => setEditInputPhone1(true)}
-                  className="text-2xl inline-block cursor-pointer my-2"
-                />
-              )}
-              <Input
-                isInvalid={Boolean(erorrEditInputPhone1)}
-                errorMessage={erorrEditInputPhone1}
-                onChange={(e) => setEditInputPhone1Value(e.target.value)}
-                value={EditInputPhone1Value.replace("+", "")}
-                isDisabled={EditInputPhone1}
-                className="w-fit "
-              ></Input>
-              <h3 className="py-1">: Phone Number</h3>
-            </div>
-            {/* Phone Number */}
-            {/* /// */}
-            <div className="border-b-1 flex justify-end gap-4 border-main-background px-2 py-7">
-              {EditInputPhone2 ? (
-                <MdCancel
-                  onClick={() => setEditInputPhone2(false)}
-                  className="text-2xl font-bold cursor-pointer my-1"
-                />
-              ) : (
-                <FaEdit
-                  onClick={() => setEditInputPhone2(true)}
-                  className="text-2xl font-bold cursor-pointer my-1"
-                />
-              )}
-              <Input
-                required
-                onChange={(e) => setEditInputPhone2Value(e.target.value)}
-                value={EditInputPhone2Value.replace("+", "")}
-                // isInvalid={Boolean(errors.SecondPhoneNumber?.message)}
-                // errorMessage={errors.SecondPhoneNumber?.message}
-                isDisabled={!EditInputPhone2}
-                className="w-fit"
-              ></Input>
-              <span className="font-bold py-1">: Second Phone Number</span>
-            </div>
-            {/*Second Phone Number */}
-            {/* /// */}
-            <div className="border-b-1 flex gap-4 justify-end border-main-background px-2 py-7">
-              <div className="w-fit gap-4 flex">
-                <Input
-                  required
-                  // isInvalid={Boolean(errors.Email?.message)}
-                  // errorMessage={errors.Email?.message}
-                  onChange={(e) => {
-                    setEmailInputValue(e.target.value);
-                  }}
-                  value={EmailInputValue}
-                  isDisabled={!EmailInputToggel}
-                  className="w-full order-2 "
-                ></Input>
-
-                {EmailInputToggel ? (
-                  <MdCancel
-                    onClick={() => {
-                      setEmailInputToggel(false);
-                      setEmailInputValue(data?.user.email!);
-                    }}
-                    className="cursor-pointer text-3xl order-1"
-                  />
-                ) : (
-                  <FaEdit
-                    onClick={() => setEmailInputToggel(true)}
-                    className=" cursor-pointer text-3xl order-1"
-                  />
-                )}
-              </div>
-              <span className="my-1 font-bold text-xl">:Email</span>
-            </div>
-            {/* Email */}
-            {/* /// */}
-            <address className="border-b-1 flex gap-4  justify-end text-xl font-bold border-main-background px-2 py-7">
-              {EditAddressInput ? (
-                <MdCancel
-                  onClick={() => setEditAddressInput(false)}
-                  className="text-2xl my-1 cursor-pointer"
-                />
-              ) : (
-                <FaEdit
-                  onClick={() => setEditAddressInput(true)}
-                  className="text-2xl my-1 cursor-pointer"
-                />
-              )}
-
-              <Autocomplete
-                required
-                onSelectionChange={(key) => setAddressInputValue(key)}
-                className="w-fit cursor-pointer"
-                label="Address"
-              >
-                {ServiceAddress.map((address) => (
-                  <AutocompleteItem key={address.Address}>
-                    {address.Address}
-                  </AutocompleteItem>
-                ))}
-              </Autocomplete>
-
-              <span className="py-1">: Address</span>
-            </address>
-            {/* Address */}
-            {/* /// */}
-            <div className="border-b-1 flex justify-end gap-4 border-main-background px-2 py-7">
-              {EditGenderInput ? (
-                <MdCancel
-                  onClick={() => setEditGenderInput(false)}
-                  className="text-2xl font-bold cursor-pointer my-1"
-                />
-              ) : (
-                <FaEdit
-                  onClick={() => setEditGenderInput(true)}
-                  className="text-2xl font-bold cursor-pointer my-1"
-                />
-              )}
-              <Input
-                // isInvalid={Boolean(errors.Gender?.message)}
-
-                // errorMessage={errors.Gender?.message}
-
-                onChange={(e) => setGenderInputValue(e.target.value)}
-                value={GenderInputValue}
-                isDisabled={!EditGenderInput}
-                className="w-fit"
-              ></Input>{" "}
-              <span className="text-xl font-bold py-1">: Gender</span>
-            </div>
-            {/* Gender */}
-            {/* /// */}
-            <div className="border-b-1 flex justify-end gap-4 border-main-background px-2 py-7">
-              {EditDateOFberthInput ? (
-                <MdCancel
-                  onClick={() => setEditDateOFberthInput(false)}
-                  className="text-2xl font-bold cursor-pointer my-3"
-                />
-              ) : (
-                <FaEdit
-                  onClick={() => setEditDateOFberthInput(true)}
-                  className="text-2xl font-bold cursor-pointer my-3"
-                />
-              )}
-              <Input
-                required
-                // isInvalid={Boolean(errors.DateOfBirth?.message)}
-                // errorMessage={errors.DateOfBirth?.message}
-                onChange={(e) => setDateOFberthValue(e.target.value)}
-                value={DateOFberthValue}
-                isDisabled={!EditDateOFberthInput}
-                className="w-fit"
-                label="Date of Burth"
-                type="date"
-              />{" "}
-              <span className="font-bold text-xl py-2">: Date Of Birth</span>
-            </div>
-            <div>
-              {" "}
-              <Button
-                onPress={EditUserInfo}
-                className="my-5 mx-auto block px-10"
-              >
-                {" "}
-                supmit{" "}
-              </Button>{" "}
             </div>
           </div>
-        </div>
-      </form>
-    </section>
+        </section>
+      )}
+    </>
   );
 }
