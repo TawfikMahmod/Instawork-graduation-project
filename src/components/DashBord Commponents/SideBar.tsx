@@ -4,6 +4,7 @@ import { MdArrowForwardIos } from "react-icons/md";
 
 import Link from "next/link";
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dropdown,
   DropdownTrigger,
@@ -32,6 +33,7 @@ const items = [
 ];
 export default function SideBar() {
   const pathname = usePathname();
+  const t = useTranslations("SideBar");
 
   return (
     <>
@@ -41,36 +43,36 @@ export default function SideBar() {
             href={"/Dashbord/Profile"}
             className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
               pathname === "/Dashbord/Profile"
-                ? "bg-linear-to-r from-main-background to-primry-background text-white"
+                ? "bg-linear-to-r from-main-background to-primry-background text-black"
                 : "hover:bg-primry-background/20"
             }`}
           >
             <MdDashboardCustomize className="text-xl" />
-            <span>Profile</span>
+            <span>{t("profile")}</span>
           </Link>
 
           <Link
             href={"/Dashbord/MyServices"}
             className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
               pathname === "/Dashbord/MyServices"
-                ? "bg-linear-to-r from-main-background to-primry-background text-white"
+                ? "bg-linear-to-r from-main-background to-primry-background text-black"
                 : "hover:bg-primry-background/20"
             }`}
           >
             <MdArrowForwardIos className="text-sm rotate-180" />
-            <span>MyServices</span>
+            <span>{t("my_services")}</span>
           </Link>
 
           <Link
             href={"/Dashbord/MyJobs"}
             className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
               pathname === "/Dashbord/MyJobs"
-                ? "bg-linear-to-r from-main-background to-primry-background text-white"
+                ? "bg-linear-to-r from-main-background to-primry-background text-black"
                 : "hover:bg-primry-background/20"
             }`}
           >
             <MdArrowForwardIos className="text-sm" />
-            <span>MyJobs</span>
+            <span>{t("my_jobs")}</span>
           </Link>
         </nav>
       </div>

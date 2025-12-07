@@ -1,7 +1,7 @@
 "use client";
 import { UserData, UserDataRespons } from "@/app/types/UserInterface";
-import UpdateingUserInfo from "@/services/UpdateUserInfo";
-import CallingUserInfoAPI from "@/services/UserInfoAPI";
+import UpdateingUserInfo from "@/services/ProfileAPI/UpdateUserInfo";
+import CallingUserInfoAPI from "@/services/ProfileAPI/UserInfoAPI";
 import { AiOutlineLoading } from "react-icons/ai";
 import { CalendarDate } from "@internationalized/date";
 import {
@@ -14,7 +14,8 @@ import {
   Textarea,
   ToastProvider,
 } from "@heroui/react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { FaRegEdit } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
@@ -22,8 +23,10 @@ import { MdEdit, MdOutlineAddPhotoAlternate } from "react-icons/md";
 import { MdCancel } from "react-icons/md";
 import { Governorates } from "@/components/DashBord Commponents/Profile/Governorates";
 import Loader from "@/components/Loader";
+import DeleteUser from "@/services/ProfileAPI/DeleteUser";
 
 export default function page() {
+  const t = useTranslations("Profile");
   //
   //
   //
@@ -139,11 +142,11 @@ export default function page() {
     //
     ////////////////-----name ////////////////////////
     if (CountroledNameInput === "") {
-      setErorrName("Cant let Name Empty");
+      setErorrName(t("cant_let_empty"));
     } else if (CountroledNameInput!?.length > 20) {
-      setErorrName("name cant be more then 20 char");
+      setErorrName(t("name_max_length"));
     } else if (CountroledNameInput!?.length < 3) {
-      setErorrName("name cant be less then 3 char");
+      setErorrName(t("name_min_length"));
     } else {
       formdata.append("Fullname", CountroledNameInput + "");
       setErorrName(null);
@@ -154,12 +157,12 @@ export default function page() {
     //////////////-----------phone (1) ////////////////
     if ("+" + CountroledPhone_1_Input === UserIFON?.phoneNumber) {
     } else if (CountroledPhone_1_Input === "") {
-      setErorrPhone_1("Cant let Phone Number Empty!");
+      setErorrPhone_1(t("cant_let_empty"));
     } else if (phoneRegix.test(CountroledPhone_1_Input!)) {
       formdata.append("PhoneNumber", "+" + CountroledPhone_1_Input);
       setErorrPhone_1(null);
     } else {
-      setErorrPhone_1("Phone Number inValid");
+      setErorrPhone_1(t("phone_invalid"));
     }
     ///////////////////////////////////////////////
     //
@@ -176,19 +179,19 @@ export default function page() {
       CountroledPhone_2_Input !== null &&
       CountroledPhone_2_Input! !== ""
     ) {
-      setErorrPhone_2("Second Phone Number inValid");
+      setErorrPhone_2(t("phone_invalid"));
     }
     ///////////////////////////////////////////////
     //
     //
     ////////////--------------- Email
     if (CountroledEmailInput === "") {
-      setErorrEmail("Cant let the fuckin Email Empty Man!!");
+      setErorrEmail(t("cant_let_empty"));
     } else if (EmailRegix.test(CountroledEmailInput!)) {
       formdata.append("Email", CountroledEmailInput + "");
       setErorrEmail(null);
     } else {
-      setErorrEmail("Email inValid");
+      setErorrEmail(t("email_invalid"));
     }
     // //////////////////////////////////////////////
     //
@@ -252,7 +255,7 @@ export default function page() {
       console.log("okokok");
     } else {
       addToast({
-        title: "Error",
+        title: t("error"),
         color: "danger",
       });
     }
@@ -348,7 +351,6 @@ export default function page() {
   //
   //
   // did amount
-  const [test, settest] = useState<boolean>(false);
   // amount update
   useEffect(() => {
     //
@@ -394,14 +396,19 @@ export default function page() {
   ]);
 
   useEffect(() => {
-    UserInfo();
-  }, [test]);
+    //
 
-  useEffect(() => {
+    UserInfo();
     //
-    settest(!test);
-    //
-  }, []);
+  }, [data?.user.userId]);
+
+  async function DeleteAccount() {
+    const respons = await DeleteUser();
+    if (respons) {
+      signOut();
+      console.log(respons);
+    }
+  }
 
   return (
     <>
@@ -409,7 +416,7 @@ export default function page() {
         <div className="h-screen content-center text-center">
           <div className="-translate-y-full">
             <Loader />
-            <span className="ps-6  my-3">Loading . . .</span>
+            <span className="ps-6  my-3">{t("loading")}</span>
           </div>
         </div>
       ) : (
@@ -435,7 +442,7 @@ export default function page() {
                     <span className="absolute cursor-pointer bottom-0 left-0 right-0 h-full bg-main-background/90 opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center">
                       <MdOutlineAddPhotoAlternate className="text-4xl text-primry-background mb-2" />
                       <p className="text-primry-background text-sm font-semibold">
-                        تغيير الصورة
+                        {t("change_photo")}
                       </p>
                       <label
                         htmlFor="ImgInput"
@@ -461,7 +468,7 @@ export default function page() {
                     {UserIFON?.email}
                   </p>
                   <p className="text-sm mt-3 opacity-75 max-w-md">
-                    {UserIFON?.bio || "أضف نبذة عن نفسك"}
+                    {UserIFON?.bio || t("add_bio")}
                   </p>
                 </div>
 
@@ -480,7 +487,7 @@ export default function page() {
                         isLoading={LoadingSaveBtn}
                         className="bg-linear-to-r from-main-background to-orange-600 text-white font-bold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                       >
-                        <span className="text-lg">✓</span> حفظ
+                        <span className="text-lg">✓</span> {t("save")}
                       </Button>
                       {/* Cancel Button */}
                       <Button
@@ -493,7 +500,7 @@ export default function page() {
                         }}
                         className="bg-linear-to-r from-red-500 to-red-600 text-white font-bold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                       >
-                        <span className="text-lg">✕</span> إلغاء
+                        <span className="text-lg">✕</span> {t("cancel")}
                       </Button>
                     </div>
                   )}
@@ -505,7 +512,7 @@ export default function page() {
           <div className="p-5  ">
             <div className="bg-white rounded-2xl p-8 shadow-lg border-l-8 border-main-background">
               <label className="block text-main-background font-bold text-lg mb-3">
-                نبذة عن نفسك
+                {t("about_yourself")}
               </label>
               <Textarea
                 isInvalid={Boolean(ErorrBio)}
@@ -515,14 +522,15 @@ export default function page() {
                   CountroledInputBIO! === "null" ? "" : CountroledInputBIO!
                 }
                 maxLength={200}
-                placeholder="اكتب نبذة عن نفسك وخبرتك"
+                placeholder={t("bio_placeholder")}
                 variant="faded"
                 type="text"
                 className="rounded-lg"
               />
               {CountroledInputBIO && (
                 <span className="text-gray-500 text-sm mt-2 block">
-                  المتبقي: {200 - CountroledInputBIO.length} أحرف
+                  {t("remaining_characters")}: {200 - CountroledInputBIO.length}{" "}
+                  {t("characters")}
                 </span>
               )}
             </div>
@@ -536,7 +544,7 @@ export default function page() {
                 {/* Name Input */}
                 <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-blue-500 mb-6 hover:shadow-xl transition-all duration-300">
                   <label className="block text-main-background font-bold text-lg mb-2">
-                    الاسم الكامل
+                    {t("full_name")}
                   </label>
                   <Input
                     isInvalid={Boolean(ErorrName)}
@@ -545,14 +553,14 @@ export default function page() {
                     value={CountroledNameInput!}
                     variant="faded"
                     type="text"
-                    placeholder="أدخل اسمك الكامل"
+                    placeholder={t("full_name_placeholder")}
                   />
                 </div>
 
                 {/* Phone 1 Input */}
                 <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-main-background mb-6 hover:shadow-xl transition-all duration-300">
                   <label className="block text-main-background font-bold text-lg mb-2">
-                    رقم الهاتف الأول
+                    {t("first_phone")}
                   </label>
                   <Input
                     isInvalid={Boolean(ErorrPhone_1)}
@@ -561,14 +569,14 @@ export default function page() {
                     value={CountroledPhone_1_Input!}
                     variant="faded"
                     type="text"
-                    placeholder="01xxxxxxxxx"
+                    placeholder={t("phone_placeholder")}
                   />
                 </div>
 
                 {/* Phone 2 Input */}
                 <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-purple-500 mb-6 hover:shadow-xl transition-all duration-300">
                   <label className="block text-main-background font-bold text-lg mb-2">
-                    رقم الهاتف الثاني
+                    {t("second_phone")}
                   </label>
                   <Input
                     isInvalid={Boolean(ErorrPhone_2)}
@@ -577,13 +585,13 @@ export default function page() {
                     value={CountroledPhone_2_Input!}
                     type="text"
                     variant="faded"
-                    placeholder="01xxxxxxxxx"
+                    placeholder={t("phone_placeholder")}
                   />
                 </div>
                 {/* Email Input */}
                 <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-red-500 mb-6 hover:shadow-xl transition-all duration-300">
                   <label className="block text-main-background font-bold text-lg mb-2">
-                    البريد الإلكتروني
+                    {t("email")}
                   </label>
                   <Input
                     isInvalid={Boolean(ErorrEmail)}
@@ -592,7 +600,7 @@ export default function page() {
                     value={CountroledEmailInput!}
                     variant="faded"
                     type="email"
-                    placeholder="example@email.com"
+                    placeholder={t("email_placeholder")}
                   />
                 </div>
               </div>
@@ -605,7 +613,7 @@ export default function page() {
                 {/* Address */}
                 <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-orange-500 hover:shadow-xl transition-all duration-300">
                   <label className="block text-main-background font-bold text-lg mb-2">
-                    المحافظة
+                    {t("governorate")}
                   </label>
                   {UnlockInput ? (
                     <Autocomplete
@@ -614,7 +622,7 @@ export default function page() {
                       onInputChange={(S) => setCountroledAddress_Selection(S)}
                       className="w-full"
                       defaultItems={Governorates}
-                      placeholder="اختر المحافظة"
+                      placeholder={t("governorate")}
                     >
                       {(Governorate) => (
                         <AutocompleteItem key={Governorate.label}>
@@ -639,7 +647,7 @@ export default function page() {
                 {/* Gender */}
                 <div className="p-6 bg-white rounded-2xl shadow-lg border-l-8 border-pink-500 hover:shadow-xl transition-all duration-300">
                   <label className="block text-main-background font-bold text-lg mb-2">
-                    النوع
+                    {t("gender")}
                   </label>
                   {UnlockGenderInput ? (
                     <Autocomplete
@@ -649,10 +657,10 @@ export default function page() {
                       onInputChange={(S) => setCountroledGender_Selection(S)}
                       value={CountroledGender_Selection!}
                       className="w-full"
-                      placeholder="اختر النوع"
+                      placeholder={t("gender")}
                     >
-                      <AutocompleteItem>Male</AutocompleteItem>
-                      <AutocompleteItem>Female</AutocompleteItem>
+                      <AutocompleteItem>{t("male")}</AutocompleteItem>
+                      <AutocompleteItem>{t("female")}</AutocompleteItem>
                     </Autocomplete>
                   ) : (
                     <Button
@@ -667,7 +675,7 @@ export default function page() {
                 {/* Date of Birth */}
                 <div className="p-6 w-full mx-auto bg-white rounded-2xl shadow-lg border-l-8 border-cyan-500 hover:shadow-xl transition-all duration-300">
                   <label className="block text-main-background font-bold text-lg mb-2">
-                    تاريخ الميلاد
+                    {t("date_of_birth")}
                   </label>
                   <div className="flex w-full gap-4">
                     <Input
@@ -687,6 +695,13 @@ export default function page() {
                 </div>
               </div>
             </div>
+          </div>
+          {/* //////// delete account  */}
+          <div className=" border-y-2 p-4 border-red-600 text-center">
+            <Button onPress={DeleteAccount} className="px-10" color="danger">
+              Delete
+            </Button>
+            <span className="px-3 text-red-600 "> : Delete Account</span>
           </div>
         </section>
       )}

@@ -1,5 +1,6 @@
 "use client";
 import { Button, Input, Select, SelectItem } from "@heroui/react";
+import { useTranslations } from "use-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -14,6 +15,7 @@ import { data, RegisterAPICall } from "../RoutHandler/RegisterRoute";
 import { promises } from "dns";
 
 export default function Register() {
+  const t = useTranslations("Register");
   const {
     handleSubmit,
     register,
@@ -30,7 +32,8 @@ export default function Register() {
       dateOfBirth: "",
     },
     resolver: zodResolver(RegisterScheme),
-    mode: "onSubmit",
+    mode: "onBlur",
+    reValidateMode: "onChange",
   });
 
   const Route = useRouter();
@@ -90,10 +93,8 @@ export default function Register() {
             <div className="inline-flex items-center justify-center w-14 h-14 bg-linear-to-br from-main-background to-orange-600 rounded-full mb-4">
               <span className="text-2xl text-white font-bold">⭐</span>
             </div>
-            <h1 className="text-4xl font-bold text-white">CREATE ACCOUNT</h1>
-            <p className="text-gray-300 text-sm mt-2">
-              Join InstaWork and start your freelance journey
-            </p>
+            <h1 className="text-4xl font-bold text-white">{t("create_account")}</h1>
+            <p className="text-gray-300 text-sm mt-2">{t("join_instawork")}</p>
           </motion.div>
 
           <form onSubmit={handleSubmit(sendData)} className="space-y-4">
@@ -109,10 +110,10 @@ export default function Register() {
                   isInvalid={Boolean(errors.name)}
                   errorMessage={errors.name?.message}
                   variant={"faded"}
-                  label="Full Name"
-                  placeholder="Tony Montana"
+                    label={t("full_name")}
+                    placeholder={t("full_name_placeholder")}
                   type="text"
-                  className="bg-white/5"
+                  className=""
                   {...register("name")}
                 />
               </motion.div>
@@ -127,10 +128,10 @@ export default function Register() {
                   isInvalid={Boolean(errors.email) && dirtyFields.email}
                   errorMessage={errors.email?.message}
                   variant={"faded"}
-                  label="Email"
-                  placeholder="Montana@SAYOS.com"
+                    label={t("email")}
+                    placeholder={t("email_placeholder")}
                   type="email"
-                  className="bg-white/5"
+                  className=""
                   {...register("email")}
                 />
               </motion.div>
@@ -148,12 +149,12 @@ export default function Register() {
                   isInvalid={Boolean(errors.password) && dirtyFields.password}
                   errorMessage={errors.password?.message}
                   variant={"faded"}
-                  label="Password"
-                  placeholder="Enter your password"
+                  label={t("password")}
+                    placeholder={t("password_placeholder")}
                   type={`${
                     process.env.NODE_ENV === "development" ? "text" : "password"
                   }`}
-                  className="bg-white/5"
+                  className=""
                   {...register("password")}
                 />
               </motion.div>
@@ -170,12 +171,12 @@ export default function Register() {
                   }
                   errorMessage={errors.rePassword?.message}
                   variant={"faded"}
-                  label="Confirm Password"
-                  placeholder="Confirm your password"
+                  label={t("confirm_password")}
+                    placeholder={t("confirm_password_placeholder")}
                   type={`${
                     process.env.NODE_ENV === "development" ? "text" : "password"
                   }`}
-                  className="bg-white/5"
+                  className=""
                   {...register("rePassword")}
                 />
               </motion.div>
@@ -196,10 +197,10 @@ export default function Register() {
                   errorMessage={errors.phoneNumber?.message}
                   variant={"faded"}
                   color="default"
-                  label="Phone Number"
-                  placeholder="01XXXXXXXXX"
+                  label={t("phone_number")}
+                  placeholder={t("phone_placeholder")}
                   type="text"
-                  className="bg-white/5"
+                  className=""
                   {...register("phoneNumber")}
                 />
               </motion.div>
@@ -211,10 +212,12 @@ export default function Register() {
                 animate="visible"
               >
                 <Input
-                  label="Date of Birth"
+                  isInvalid={Boolean(errors.dateOfBirth)}
+                  errorMessage={errors.dateOfBirth?.message}
+                  label={t("date_of_birth")}
                   type="date"
                   variant="faded"
-                  className="bg-white/5"
+                  className=""
                   {...register("dateOfBirth")}
                 />
               </motion.div>
@@ -228,18 +231,18 @@ export default function Register() {
               animate="visible"
             >
               <Select
-                label="Gender"
+                label={t("gender")}
                 variant="faded"
-                placeholder="Select your gender"
+                placeholder={t("gender_placeholder")}
                 isInvalid={
                   Boolean(errors.gender?.message) && dirtyFields.gender
                 }
                 errorMessage={errors.gender?.message}
-                className="bg-white/5"
+                className=""
                 {...register("gender")}
               >
-                <SelectItem key={"Male"}>Male</SelectItem>
-                <SelectItem key={"Female"}>Female</SelectItem>
+                <SelectItem key={"Male"}>{t("male")}</SelectItem>
+                <SelectItem key={"Female"}>{t("female")}</SelectItem>
               </Select>
             </motion.div>
 
@@ -254,8 +257,8 @@ export default function Register() {
                     : "text-red-400 bg-red-500/10 border-red-500/20"
                 }`}
               >
-                {ApiRespons === "User registered successfully." ? "✅" : "❌"}{" "}
-                {ApiRespons}
+                {ApiRespons === "User registered successfully." ? "✅" : "❌"} {" "}
+                {ApiRespons === "User registered successfully." ? t("success_message") : ApiRespons}
               </motion.p>
             )}
 
@@ -272,7 +275,7 @@ export default function Register() {
                 type="submit"
                 className="flex-1 bg-linear-to-r from-main-background to-orange-600 text-white font-semibold py-3 rounded-lg hover:shadow-lg hover:shadow-main-background/50 transition-all duration-300"
               >
-                {isLooding ? "Creating Account..." : "Create Account"}
+                {isLooding ? t("creating_account") : t("create_account_button")}
               </Button>
             </motion.div>
           </form>
@@ -285,12 +288,12 @@ export default function Register() {
             className="text-center mt-8 pt-6 border-t border-white/10"
           >
             <p className="text-gray-300 text-sm">
-              Have Already an Account?{" "}
+              {t("have_account")} {" "}
               <span
                 className="text-main-background font-semibold cursor-pointer hover:text-orange-600 transition-colors duration-300"
                 onClick={() => Route.push("/Login")}
               >
-                LogIn here
+                {t("login_link")}
               </span>
             </p>
           </motion.div>

@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "./language-switcher";
 import {
   Navbar as NavbarComponent,
   NavbarBrand,
@@ -11,42 +13,56 @@ import {
   Button,
 } from "@heroui/react";
 import { FaRegHandshake } from "react-icons/fa6";
+import Instawork_icon from "@/../public/Icon/Instawork-logo-white.png";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-
+  const t = useTranslations("NavBar");
   const path = usePathname();
   const { status, data } = useSession();
+  const session = useSession();
 
   const NavItems = [
-    { lable: "Dashboard", href: "/Dashbord/Profile" },
-    { lable: "Services", href: "/services" },
-    { lable: "Jobs", href: "/Jobs" },
+    { lable: t("services_lab"), href: "/services" },
+    { lable: t("jobs_lab"), href: "/Jobs" },
+    { lable: t("dashbord_lab"), href: "/Dashbord/Profile" },
   ];
 
   return (
     <NavbarComponent
-      className="backgroundNavBar"
+      className="backgroundNavBar py-2   "
       onMenuOpenChange={setIsMenuOpen}
     >
-      <NavbarContent>
+      <NavbarContent className="">
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="sm:hidden"
+          className="sm:hidden "
         />
-        <NavbarBrand className={`${path === "/" && "text-white"}`}>
-          <FaRegHandshake className="text-4xl" />
-          <Link href={"/"} className="font-bold text-inherit text-xl ps-3">
-            InstaWork
+        <NavbarBrand
+          className={`${path === "/" && "text-white"} max-sm:hidden `}
+        >
+          {/* <FaRegHandshake className="text-4xl" /> */}
+          <Link href={"/"} className="font-bold text-inherit text-xl  ps-3">
+            <Image
+              className="mx-auto "
+              src={Instawork_icon}
+              width={60}
+              height={60}
+              alt="s"
+            />
           </Link>
         </NavbarBrand>
       </NavbarContent>
 
-      <NavbarContent className="hidden sm:flex gap-4 " justify="center">
+      <NavbarContent
+        className="hidden sm:flex gap-4 relative "
+        justify="center"
+      >
         {NavItems.map((item, index) => (
           <NavbarItem
             key={`${item}-${index}`}
@@ -58,6 +74,9 @@ export default function Navbar() {
             </Link>
           </NavbarItem>
         ))}
+        <div>
+          <LanguageSwitcher />
+        </div>
       </NavbarContent>
 
       <NavbarContent justify="end">
@@ -67,7 +86,7 @@ export default function Navbar() {
               onPress={() => signOut({ callbackUrl: "/" })}
               className="hover:bg-primry-background hover:text-main-background transition-all duration-300 py-2 px-6 min-w-24 m-2 rounded-lg text-center bg-main-background text-primry-background border-2 border-primry-background font-semibold shadow-lg hover:shadow-xl"
             >
-              Logout
+              {t("logout")}
             </Button>
           ) : (
             <>
@@ -75,23 +94,33 @@ export default function Navbar() {
                 className="hover:bg-primry-background hover:text-main-background transition-all duration-300 py-2 px-6 min-w-24 m-2 rounded-lg text-center bg-main-background text-primry-background border-2 border-primry-background font-semibold shadow-lg hover:shadow-xl"
                 href={"/Register"}
               >
-                Sign up
+                {t("signup")}
               </Link>
 
               <Link
                 className="hover:bg-main-background hover:text-primry-background transition-all duration-300 py-2 px-6 min-w-24 m-2 rounded-lg text-center bg-primry-background text-main-background border-2 border-primry-background font-semibold shadow-lg hover:shadow-xl"
                 href={"/Login"}
               >
-                Login
+                {t("login")}
               </Link>
             </>
           )}
         </NavbarItem>
       </NavbarContent>
 
-      <NavbarMenu>
+      <NavbarMenu className="py-10">
+        <Link
+          className="w-full p-5 hover:bg-main-background rounded-md"
+          href={"/"}
+        >
+          Home
+        </Link>
+
         {NavItems.map((item, index) => (
-          <NavbarMenuItem key={`${item}-${index}`}>
+          <NavbarMenuItem
+            className="p-5 hover:bg-main-background rounded-md"
+            key={`${item}-${index}`}
+          >
             <Link
               className="w-full"
               color={
@@ -107,6 +136,7 @@ export default function Navbar() {
             </Link>
           </NavbarMenuItem>
         ))}
+        <LanguageSwitcher />
       </NavbarMenu>
     </NavbarComponent>
   );
